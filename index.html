@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VilorChat - Login</title>
+    <title>VilorChat Global</title>
     <style>
         :root {
             --primary-color: #4a6fa5;
@@ -12,111 +12,132 @@
             --background-color: #f0f4f8;
             --message-bg: #ffffff;
             --user-message-bg: #e3f2fd;
+            --private-message-bg: #fff8e1;
             --error-color: #f44336;
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             background-color: var(--background-color);
             color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
         }
         
-        .container {
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        #login-container, #name-container, #chat-container {
+        #login-container, #chat-container {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            transition: all 0.3s ease;
         }
         
-        #name-container {
-            display: none;
+        .chat-columns {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .users-column {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .chat-column {
+            flex: 3;
         }
         
         h1, h2 {
             color: var(--primary-color);
             margin-top: 0;
-            text-align: center;
         }
         
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-size: 1em;
-            box-sizing: border-box;
-            transition: border 0.3s;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
-        }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-weight: bold;
-            font-size: 1em;
-        }
-        
-        button:hover {
-            background-color: var(--secondary-color);
-        }
-        
-        .error-message {
-            color: var(--error-color);
-            font-size: 0.85em;
-            margin-top: 5px;
-            display: none;
-        }
-        
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        #user-display {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
             margin-bottom: 15px;
         }
         
-        #user-count {
-            font-size: 0.9em;
-            color: #666;
+        #online-users {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
         }
         
-        #messages {
-            height: 400px;
+        #user-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .user-item {
+            padding: 8px 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .user-item.private {
+            background-color: #e3f2fd;
+        }
+        
+        .user-item.current-user {
+            font-weight: bold;
+            background-color: #e9ecef;
+        }
+        
+        .user-item .badge {
+            font-size: 0.7em;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+        
+        #chat-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .chat-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        
+        .chat-tab.active {
+            border-color: #ddd;
+            border-bottom-color: white;
+            background: white;
+            font-weight: bold;
+        }
+        
+        .chat-tab.unread {
+            position: relative;
+        }
+        
+        .chat-tab.unread::after {
+            content: '•';
+            color: var(--accent-color);
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1.2em;
+        }
+        
+        #messages-container {
+            height: 500px;
             overflow-y: auto;
             border: 1px solid #e0e0e0;
             padding: 15px;
@@ -139,6 +160,11 @@
             margin-left: auto;
             background-color: var(--user-message-bg);
             border-bottom-right-radius: 4px;
+        }
+        
+        .message.private-message {
+            background-color: var(--private-message-bg);
+            border-left: 3px solid #ffc107;
         }
         
         .message .sender {
@@ -171,13 +197,31 @@
             word-wrap: break-word;
         }
         
-        .chat-input {
+        .chat-input-container {
             display: flex;
             gap: 10px;
         }
         
         #message-input {
             flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+        
+        #send-btn {
+            padding: 12px 20px;
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        #send-btn:hover {
+            background-color: var(--secondary-color);
         }
         
         #typing-indicator {
@@ -201,55 +245,48 @@
             display: none;
         }
         
-        @media (max-width: 600px) {
-            body {
-                padding: 15px;
+        @media (max-width: 768px) {
+            .chat-columns {
+                flex-direction: column;
             }
             
-            #messages {
-                height: 50vh;
+            #messages-container {
+                height: 300px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Tela de Login -->
-        <div id="login-container">
-            <h1>VilorChat</h1>
-            <div class="form-group">
-                <label for="login-username">Login</label>
-                <input type="text" id="login-username" placeholder="Digite seu login" value="VilorCreated" disabled>
-            </div>
-            <div class="form-group">
-                <label for="login-password">Senha</label>
-                <input type="password" id="login-password" placeholder="Digite sua senha">
-                <div class="error-message" id="login-error"></div>
-            </div>
-            <button id="login-btn">Entrar</button>
+    <div id="login-container">
+        <h1>Bem-vindo ao VilorChat</h1>
+        <p>Converse com pessoas de todo o mundo em tempo real!</p>
+        <div style="margin: 20px 0;">
+            <input type="text" id="username" placeholder="Seu nome" autocomplete="off" maxlength="20" style="width: 100%; padding: 12px;">
         </div>
+        <button id="login-btn" style="width: 100%; padding: 12px;">Entrar no Chat</button>
+    </div>
 
-        <!-- Tela de Escolha de Nome -->
-        <div id="name-container">
-            <h2>Escolha seu nome no chat</h2>
-            <div class="form-group">
-                <input type="text" id="chat-username" placeholder="Como você quer ser chamado?" maxlength="20">
-                <div class="error-message" id="name-error"></div>
+    <div id="chat-container" style="display: none;">
+        <div class="chat-columns">
+            <div class="users-column">
+                <div id="user-display">
+                    <div id="online-users"><span id="online-count">0</span> usuários online (máx. 1000)</div>
+                    <div id="user-list"></div>
+                </div>
             </div>
-            <button id="confirm-name-btn">Entrar no Chat</button>
-        </div>
-
-        <!-- Tela do Chat -->
-        <div id="chat-container" style="display: none;">
-            <div class="chat-header">
-                <h2>Chat Global</h2>
-                <div id="user-count">Online: <span id="online-count">0</span>/100</div>
-            </div>
-            <div id="typing-indicator"></div>
-            <div id="messages"></div>
-            <div class="chat-input">
-                <input type="text" id="message-input" placeholder="Digite sua mensagem..." autocomplete="off">
-                <button id="send-btn">Enviar</button>
+            
+            <div class="chat-column">
+                <div id="chat-tabs">
+                    <div class="chat-tab active" data-tab="public">Chat Público</div>
+                </div>
+                
+                <div id="messages-container"></div>
+                <div id="typing-indicator"></div>
+                
+                <div class="chat-input-container">
+                    <input type="text" id="message-input" placeholder="Digite sua mensagem..." autocomplete="off">
+                    <button id="send-btn">Enviar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -261,7 +298,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <script>
-        // Configuração do Firebase com seu URL
+        // Configuração do Firebase
         const firebaseConfig = {
             databaseURL: "https://vilorchatmessage-default-rtdb.firebaseio.com/"
         };
@@ -272,33 +309,30 @@
 
         // Elementos da interface
         const loginContainer = document.getElementById('login-container');
-        const nameContainer = document.getElementById('name-container');
         const chatContainer = document.getElementById('chat-container');
         const loginBtn = document.getElementById('login-btn');
-        const confirmNameBtn = document.getElementById('confirm-name-btn');
-        const loginUsername = document.getElementById('login-username');
-        const loginPassword = document.getElementById('login-password');
-        const chatUsername = document.getElementById('chat-username');
-        const messagesDiv = document.getElementById('messages');
+        const usernameInput = document.getElementById('username');
+        const messagesContainer = document.getElementById('messages-container');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
         const onlineCountSpan = document.getElementById('online-count');
+        const userListDiv = document.getElementById('user-list');
         const typingIndicator = document.getElementById('typing-indicator');
         const notification = document.getElementById('notification');
-        const loginError = document.getElementById('login-error');
-        const nameError = document.getElementById('name-error');
-
-        // Credenciais fixas
-        const FIXED_LOGIN = "VilorCreated";
-        const FIXED_PASSWORD = "This";
+        const chatTabs = document.getElementById('chat-tabs');
 
         // Variáveis globais
         let currentUser = "";
         let userRef;
         let presenceRef;
         let typingRef;
+        let messagesRef;
         let lastTypingTime = 0;
         let isTyping = false;
+        let onlineUsers = {};
+        let activeChat = "public";
+        let privateChats = {};
+        let unreadMessages = {};
 
         // Mostrar notificação
         function showNotification(message) {
@@ -309,85 +343,36 @@
             }, 3000);
         }
 
-        // Validar login
-        function validateLogin() {
-            const username = loginUsername.value.trim();
-            const password = loginPassword.value.trim();
-            
-            if (username !== FIXED_LOGIN) {
-                loginError.textContent = "Login incorreto! Use: VilorCreated";
-                loginError.style.display = 'block';
-                return false;
-            }
-            
-            if (password !== FIXED_PASSWORD) {
-                loginError.textContent = "Senha incorreta! Use: This";
-                loginError.style.display = 'block';
-                return false;
-            }
-            
-            loginError.style.display = 'none';
-            return true;
-        }
-
-        // Validar nome do chat
-        function validateChatName() {
-            const name = chatUsername.value.trim();
-            
-            if (name.length < 2) {
-                nameError.textContent = "O nome deve ter pelo menos 2 caracteres";
-                nameError.style.display = 'block';
-                return false;
-            }
-            
-            if (name.length > 20) {
-                nameError.textContent = "O nome deve ter no máximo 20 caracteres";
-                nameError.style.display = 'block';
-                return false;
-            }
-            
-            nameError.style.display = 'none';
-            return true;
-        }
-
-        // Evento de login
+        // Login com nome de usuário
         loginBtn.addEventListener('click', () => {
-            if (validateLogin()) {
-                loginContainer.style.display = 'none';
-                nameContainer.style.display = 'block';
-                chatUsername.focus();
+            const username = usernameInput.value.trim();
+            if (username.length < 2) {
+                showNotification("Por favor, use um nome com pelo menos 2 caracteres");
+                return;
             }
+            
+            if (username.length > 20) {
+                showNotification("O nome deve ter no máximo 20 caracteres");
+                return;
+            }
+            
+            currentUser = username;
+            loginContainer.style.display = 'none';
+            chatContainer.style.display = 'block';
+            initializeChat();
+            showNotification(`Bem-vindo, ${username}!`);
         });
 
-        // Pressionar Enter no campo de senha
-        loginPassword.addEventListener('keypress', (e) => {
+        // Pressionar Enter no campo de nome
+        usernameInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 loginBtn.click();
             }
         });
 
-        // Evento de confirmação do nome
-        confirmNameBtn.addEventListener('click', () => {
-            if (validateChatName()) {
-                currentUser = chatUsername.value.trim();
-                nameContainer.style.display = 'none';
-                chatContainer.style.display = 'block';
-                initializeChat();
-                showNotification(`Bem-vindo, ${currentUser}!`);
-                messageInput.focus();
-            }
-        });
-
-        // Pressionar Enter no campo de nome
-        chatUsername.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                confirmNameBtn.click();
-            }
-        });
-
         function initializeChat() {
             // Referências do Firebase
-            const messagesRef = database.ref('messages');
+            messagesRef = database.ref('messages/public');
             presenceRef = database.ref('presence');
             typingRef = database.ref('typing');
             
@@ -404,23 +389,36 @@
                 stopTyping();
             });
             
-            // Monitorar contagem de usuários online
+            // Monitorar usuários online
             presenceRef.on('value', (snapshot) => {
-                const userCount = snapshot.numChildren();
+                onlineUsers = {};
+                const users = snapshot.val() || {};
+                
+                // Processar usuários online
+                Object.keys(users).forEach(key => {
+                    const user = users[key].user;
+                    onlineUsers[user] = key;
+                });
+                
+                // Atualizar contagem
+                const userCount = Object.keys(onlineUsers).length;
                 onlineCountSpan.textContent = userCount;
                 
-                // Limitar a 100 usuários
-                if (userCount > 10000) {
-                    showNotification("O chat está cheio (10000 usuários online). Tente novamente mais tarde.");
+                // Atualizar lista de usuários
+                updateUserList();
+                
+                // Limitar a 1000 usuários
+                if (userCount > 1000) {
+                    showNotification("O chat está cheio (1000 usuários online). Tente novamente mais tarde.");
                     setTimeout(() => window.location.reload(), 3000);
                 }
             });
             
             // Monitorar quem está digitando
             typingRef.on('child_added', (snapshot) => {
-                const typingUser = snapshot.val();
-                if (typingUser.user !== currentUser) {
-                    typingIndicator.textContent = `${typingUser.user} está digitando...`;
+                const typingData = snapshot.val();
+                if (typingData.user !== currentUser && typingData.chat === activeChat) {
+                    typingIndicator.textContent = `${typingData.user} está digitando...`;
                 }
             });
             
@@ -428,11 +426,11 @@
                 typingIndicator.textContent = "";
             });
             
-            // Carregar mensagens existentes
-            messagesRef.limitToLast(100).on('child_added', (snapshot) => {
-                const message = snapshot.val();
-                displayMessage(message);
-            });
+            // Carregar mensagens públicas existentes
+            loadPublicMessages();
+            
+            // Configurar ouvintes de mensagens privadas
+            setupPrivateChatListeners();
             
             // Enviar mensagem
             sendBtn.addEventListener('click', sendMessage);
@@ -446,6 +444,181 @@
             messageInput.addEventListener('input', updateTyping);
         }
         
+        function loadPublicMessages() {
+            messagesRef.limitToLast(100).on('child_added', (snapshot) => {
+                const message = snapshot.val();
+                if (activeChat === "public") {
+                    displayMessage(message, "public");
+                }
+            });
+        }
+        
+        function setupPrivateChatListeners() {
+            // Ouvinte para novas conversas privadas
+            database.ref('messages/private').on('child_added', (snapshot) => {
+                const privateMessages = snapshot.val() || {};
+                Object.keys(privateMessages).forEach(key => {
+                    const message = privateMessages[key];
+                    if (message.to === currentUser || message.from === currentUser) {
+                        const otherUser = message.from === currentUser ? message.to : message.from;
+                        if (!privateChats[otherUser]) {
+                            privateChats[otherUser] = true;
+                            addPrivateChatTab(otherUser);
+                        }
+                        
+                        if (activeChat !== `private-${otherUser}`) {
+                            markUnread(otherUser);
+                        }
+                        
+                        if (activeChat === `private-${otherUser}`) {
+                            displayMessage(message, "private");
+                        }
+                    }
+                });
+            });
+        }
+        
+        function updateUserList() {
+            userListDiv.innerHTML = "";
+            
+            Object.keys(onlineUsers).sort().forEach(user => {
+                if (user === currentUser) return;
+                
+                const userElement = document.createElement('div');
+                userElement.className = 'user-item';
+                userElement.textContent = user;
+                
+                if (privateChats[user]) {
+                    userElement.classList.add('private');
+                    if (unreadMessages[user]) {
+                        const unreadBadge = document.createElement('span');
+                        unreadBadge.className = 'badge';
+                        unreadBadge.textContent = unreadMessages[user];
+                        userElement.appendChild(unreadBadge);
+                    }
+                }
+                
+                userElement.addEventListener('click', () => {
+                    startPrivateChat(user);
+                });
+                
+                userListDiv.appendChild(userElement);
+            });
+            
+            // Adicionar item do usuário atual no topo
+            const currentUserElement = document.createElement('div');
+            currentUserElement.className = 'user-item current-user';
+            currentUserElement.textContent = `${currentUser} (você)`;
+            userListDiv.insertBefore(currentUserElement, userListDiv.firstChild);
+        }
+        
+        function startPrivateChat(user) {
+            if (!privateChats[user]) {
+                privateChats[user] = true;
+                addPrivateChatTab(user);
+            }
+            
+            // Ativar a aba do chat privado
+            switchChat(`private-${user}`);
+            
+            // Limpar notificações não lidas
+            if (unreadMessages[user]) {
+                delete unreadMessages[user];
+                updateUserList();
+            }
+        }
+        
+        function addPrivateChatTab(user) {
+            // Verificar se a aba já existe
+            const existingTab = document.querySelector(`.chat-tab[data-tab="private-${user}"]`);
+            if (existingTab) return;
+            
+            const tab = document.createElement('div');
+            tab.className = 'chat-tab';
+            tab.textContent = `Privado: ${user}`;
+            tab.setAttribute('data-tab', `private-${user}`);
+            
+            tab.addEventListener('click', () => {
+                switchChat(`private-${user}`);
+                if (unreadMessages[user]) {
+                    delete unreadMessages[user];
+                    tab.classList.remove('unread');
+                    updateUserList();
+                }
+            });
+            
+            chatTabs.appendChild(tab);
+        }
+        
+        function markUnread(user) {
+            if (!unreadMessages[user]) {
+                unreadMessages[user] = 1;
+            } else {
+                unreadMessages[user]++;
+            }
+            
+            updateUserList();
+            
+            const tab = document.querySelector(`.chat-tab[data-tab="private-${user}"]`);
+            if (tab) {
+                tab.classList.add('unread');
+            }
+        }
+        
+        function switchChat(chatId) {
+            // Desativar aba atual
+            document.querySelector('.chat-tab.active').classList.remove('active');
+            
+            // Ativar nova aba
+            const newTab = document.querySelector(`.chat-tab[data-tab="${chatId}"]`);
+            if (newTab) {
+                newTab.classList.add('active');
+            } else {
+                // Se não encontrar a aba (chat público), ativar a aba pública
+                document.querySelector('.chat-tab[data-tab="public"]').classList.add('active');
+                chatId = "public";
+            }
+            
+            activeChat = chatId;
+            messagesContainer.innerHTML = "";
+            typingIndicator.textContent = "";
+            
+            // Carregar mensagens apropriadas
+            if (chatId === "public") {
+                messagesRef = database.ref('messages/public');
+                messagesRef.limitToLast(100).once('value', (snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        const message = childSnapshot.val();
+                        displayMessage(message, "public");
+                    });
+                });
+            } else {
+                const privateUser = chatId.replace('private-', '');
+                database.ref('messages/private').orderByChild('conversation').equalTo(getConversationId(privateUser)).once('value', (snapshot) => {
+                    const messages = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const conversation = childSnapshot.val();
+                        Object.keys(conversation).forEach(key => {
+                            messages.push(conversation[key]);
+                        });
+                    });
+                    
+                    // Ordenar mensagens por timestamp
+                    messages.sort((a, b) => a.timestamp - b.timestamp);
+                    
+                    // Exibir mensagens
+                    messages.forEach(message => {
+                        displayMessage(message, "private");
+                    });
+                });
+            }
+        }
+        
+        function getConversationId(user) {
+            const users = [currentUser, user].sort();
+            return `${users[0]}_${users[1]}`;
+        }
+        
         function updateTyping() {
             const currentTime = new Date().getTime();
             
@@ -453,6 +626,7 @@
                 isTyping = true;
                 typingRef.push().set({
                     user: currentUser,
+                    chat: activeChat,
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
             }
@@ -483,37 +657,59 @@
                 stopTyping();
                 const timestamp = firebase.database.ServerValue.TIMESTAMP;
                 
-                database.ref('messages').push().set({
-                    user: currentUser,
-                    text: messageText,
-                    timestamp: timestamp
-                });
+                if (activeChat === "public") {
+                    // Mensagem pública
+                    messagesRef.push().set({
+                        user: currentUser,
+                        text: messageText,
+                        timestamp: timestamp
+                    });
+                } else {
+                    // Mensagem privada
+                    const privateUser = activeChat.replace('private-', '');
+                    const conversationId = getConversationId(privateUser);
+                    
+                    const newMessageRef = database.ref(`messages/private/${conversationId}`).push();
+                    newMessageRef.set({
+                        from: currentUser,
+                        to: privateUser,
+                        text: messageText,
+                        timestamp: timestamp,
+                        conversation: conversationId
+                    });
+                }
                 
                 messageInput.value = '';
             }
         }
         
-        function displayMessage(message) {
+        function displayMessage(message, type) {
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message';
             
-            if (message.user === currentUser) {
+            if (message.user === currentUser || message.from === currentUser) {
                 messageDiv.classList.add('user-message');
             }
             
+            if (type === "private") {
+                messageDiv.classList.add('private-message');
+            }
+            
+            const sender = type === "public" ? message.user : message.from;
             const time = new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
             messageDiv.innerHTML = `
                 <div class="sender">
-                    ${message.user}
-                    ${message.user === currentUser ? '<span class="badge">Você</span>' : ''}
+                    ${sender}
+                    ${(sender === currentUser) ? '<span class="badge">Você</span>' : ''}
+                    ${type === "private" ? '<span class="badge">Privado</span>' : ''}
                 </div>
                 <div class="text">${message.text}</div>
                 <div class="time">${time}</div>
             `;
             
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     </script>
 </body>
