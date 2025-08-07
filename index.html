@@ -3,80 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VilorChat</title>
+    <title>VilorChat - Login</title>
     <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3f7;
+            --background-color: #f0f4f8;
+            --message-bg: #ffffff;
+            --user-message-bg: #e3f2fd;
+            --error-color: #f44336;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: var(--background-color);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        #login-container, #chat-container {
+        
+        .container {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        #login-container, #name-container, #chat-container {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        #name-container {
+            display: none;
+        }
+        
+        h1, h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            text-align: center;
+        }
+        
+        .form-group {
             margin-bottom: 20px;
         }
-        #messages {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: white;
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
         }
-        .message {
-            margin-bottom: 10px;
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-        .message .sender {
-            font-weight: bold;
-            color: #3366cc;
-        }
-        .message .time {
-            font-size: 0.8em;
-            color: #999;
-        }
-        input, button {
-            padding: 10px;
-            margin: 5px 0;
+        
+        input {
             width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 1em;
             box-sizing: border-box;
+            transition: border 0.3s;
         }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+        }
+        
         button {
-            background-color: #4CAF50;
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: var(--primary-color);
             color: white;
             border: none;
             cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            font-size: 1em;
         }
+        
         button:hover {
-            background-color: #45a049;
+            background-color: var(--secondary-color);
         }
+        
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
         #user-count {
-            text-align: right;
             font-size: 0.9em;
             color: #666;
+        }
+        
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 8px;
+            scroll-behavior: smooth;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: var(--message-bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            max-width: 80%;
+        }
+        
+        .message.user-message {
+            margin-left: auto;
+            background-color: var(--user-message-bg);
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message .sender {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .message .sender .badge {
+            display: inline-block;
+            font-size: 0.7em;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+        
+        .message .time {
+            font-size: 0.75em;
+            color: #757575;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .message .text {
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #message-input {
+            flex: 1;
+        }
+        
+        #typing-indicator {
+            font-style: italic;
+            color: #666;
+            height: 20px;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+            
+            #messages {
+                height: 50vh;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="login-container">
-        <h2>Login no VilorChat</h2>
-        <input type="text" id="username" placeholder="Usuário" value="VilorCreated" disabled>
-        <input type="password" id="password" placeholder="Senha">
-        <button id="login-btn">Entrar</button>
+    <div class="container">
+        <!-- Tela de Login -->
+        <div id="login-container">
+            <h1>VilorChat</h1>
+            <div class="form-group">
+                <label for="login-username">Login</label>
+                <input type="text" id="login-username" placeholder="Digite seu login" value="VilorCreated" disabled>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Senha</label>
+                <input type="password" id="login-password" placeholder="Digite sua senha">
+                <div class="error-message" id="login-error"></div>
+            </div>
+            <button id="login-btn">Entrar</button>
+        </div>
+
+        <!-- Tela de Escolha de Nome -->
+        <div id="name-container">
+            <h2>Escolha seu nome no chat</h2>
+            <div class="form-group">
+                <input type="text" id="chat-username" placeholder="Como você quer ser chamado?" maxlength="20">
+                <div class="error-message" id="name-error"></div>
+            </div>
+            <button id="confirm-name-btn">Entrar no Chat</button>
+        </div>
+
+        <!-- Tela do Chat -->
+        <div id="chat-container" style="display: none;">
+            <div class="chat-header">
+                <h2>Chat Global</h2>
+                <div id="user-count">Online: <span id="online-count">0</span>/100</div>
+            </div>
+            <div id="typing-indicator"></div>
+            <div id="messages"></div>
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Digite sua mensagem..." autocomplete="off">
+                <button id="send-btn">Enviar</button>
+            </div>
+        </div>
     </div>
 
-    <div id="chat-container" style="display: none;">
-        <div id="user-count">Online: <span id="online-count">0</span>/100</div>
-        <h2>VilorChat Global</h2>
-        <div id="messages"></div>
-        <input type="text" id="message-input" placeholder="Digite sua mensagem...">
-        <button id="send-btn">Enviar</button>
-    </div>
+    <div class="notification" id="notification"></div>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -94,34 +272,116 @@
 
         // Elementos da interface
         const loginContainer = document.getElementById('login-container');
+        const nameContainer = document.getElementById('name-container');
         const chatContainer = document.getElementById('chat-container');
         const loginBtn = document.getElementById('login-btn');
-        const passwordInput = document.getElementById('password');
+        const confirmNameBtn = document.getElementById('confirm-name-btn');
+        const loginUsername = document.getElementById('login-username');
+        const loginPassword = document.getElementById('login-password');
+        const chatUsername = document.getElementById('chat-username');
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
         const onlineCountSpan = document.getElementById('online-count');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const notification = document.getElementById('notification');
+        const loginError = document.getElementById('login-error');
+        const nameError = document.getElementById('name-error');
+
+        // Credenciais fixas
+        const FIXED_LOGIN = "VilorCreated";
+        const FIXED_PASSWORD = "This";
 
         // Variáveis globais
-        let username = "VilorCreated";
+        let currentUser = "";
         let userRef;
         let presenceRef;
+        let typingRef;
+        let lastTypingTime = 0;
+        let isTyping = false;
 
-        // Login simples com senha fixa
+        // Mostrar notificação
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Validar login
+        function validateLogin() {
+            const username = loginUsername.value.trim();
+            const password = loginPassword.value.trim();
+            
+            if (username !== FIXED_LOGIN) {
+                loginError.textContent = "Login incorreto! Use: VilorCreated";
+                loginError.style.display = 'block';
+                return false;
+            }
+            
+            if (password !== FIXED_PASSWORD) {
+                loginError.textContent = "Senha incorreta! Use: This";
+                loginError.style.display = 'block';
+                return false;
+            }
+            
+            loginError.style.display = 'none';
+            return true;
+        }
+
+        // Validar nome do chat
+        function validateChatName() {
+            const name = chatUsername.value.trim();
+            
+            if (name.length < 2) {
+                nameError.textContent = "O nome deve ter pelo menos 2 caracteres";
+                nameError.style.display = 'block';
+                return false;
+            }
+            
+            if (name.length > 20) {
+                nameError.textContent = "O nome deve ter no máximo 20 caracteres";
+                nameError.style.display = 'block';
+                return false;
+            }
+            
+            nameError.style.display = 'none';
+            return true;
+        }
+
+        // Evento de login
         loginBtn.addEventListener('click', () => {
-            if (passwordInput.value === "This") {
+            if (validateLogin()) {
                 loginContainer.style.display = 'none';
-                chatContainer.style.display = 'block';
-                initializeChat();
-            } else {
-                alert("Senha incorreta! Use: This");
+                nameContainer.style.display = 'block';
+                chatUsername.focus();
             }
         });
 
         // Pressionar Enter no campo de senha
-        passwordInput.addEventListener('keypress', (e) => {
+        loginPassword.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 loginBtn.click();
+            }
+        });
+
+        // Evento de confirmação do nome
+        confirmNameBtn.addEventListener('click', () => {
+            if (validateChatName()) {
+                currentUser = chatUsername.value.trim();
+                nameContainer.style.display = 'none';
+                chatContainer.style.display = 'block';
+                initializeChat();
+                showNotification(`Bem-vindo, ${currentUser}!`);
+                messageInput.focus();
+            }
+        });
+
+        // Pressionar Enter no campo de nome
+        chatUsername.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                confirmNameBtn.click();
             }
         });
 
@@ -129,17 +389,19 @@
             // Referências do Firebase
             const messagesRef = database.ref('messages');
             presenceRef = database.ref('presence');
+            typingRef = database.ref('typing');
             
             // Registrar usuário online
             userRef = presenceRef.push();
             userRef.set({
-                user: username,
+                user: currentUser,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
             
             // Remover usuário quando sair
             window.addEventListener('beforeunload', () => {
                 userRef.remove();
+                stopTyping();
             });
             
             // Monitorar contagem de usuários online
@@ -148,10 +410,22 @@
                 onlineCountSpan.textContent = userCount;
                 
                 // Limitar a 100 usuários
-                if (userCount > 300) {
-                    alert("O chat está cheio (300 usuários online). Tente novamente mais tarde.");
-                    window.location.reload();
+                if (userCount > 100) {
+                    showNotification("O chat está cheio (100 usuários online). Tente novamente mais tarde.");
+                    setTimeout(() => window.location.reload(), 3000);
                 }
+            });
+            
+            // Monitorar quem está digitando
+            typingRef.on('child_added', (snapshot) => {
+                const typingUser = snapshot.val();
+                if (typingUser.user !== currentUser) {
+                    typingIndicator.textContent = `${typingUser.user} está digitando...`;
+                }
+            });
+            
+            typingRef.on('child_removed', (snapshot) => {
+                typingIndicator.textContent = "";
             });
             
             // Carregar mensagens existentes
@@ -167,15 +441,50 @@
                     sendMessage();
                 }
             });
+            
+            // Monitorar digitação
+            messageInput.addEventListener('input', updateTyping);
+        }
+        
+        function updateTyping() {
+            const currentTime = new Date().getTime();
+            
+            if (!isTyping) {
+                isTyping = true;
+                typingRef.push().set({
+                    user: currentUser,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+            
+            lastTypingTime = currentTime;
+            
+            setTimeout(() => {
+                if (currentTime - lastTypingTime > 2000 && isTyping) {
+                    stopTyping();
+                }
+            }, 2000);
+        }
+        
+        function stopTyping() {
+            if (isTyping) {
+                typingRef.orderByChild('user').equalTo(currentUser).once('value', (snapshot) => {
+                    snapshot.forEach((childSnapshot) => {
+                        childSnapshot.ref.remove();
+                    });
+                });
+                isTyping = false;
+            }
         }
         
         function sendMessage() {
             const messageText = messageInput.value.trim();
             if (messageText) {
+                stopTyping();
                 const timestamp = firebase.database.ServerValue.TIMESTAMP;
                 
                 database.ref('messages').push().set({
-                    user: username,
+                    user: currentUser,
                     text: messageText,
                     timestamp: timestamp
                 });
@@ -188,12 +497,19 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message';
             
-            const time = new Date(message.timestamp).toLocaleTimeString();
+            if (message.user === currentUser) {
+                messageDiv.classList.add('user-message');
+            }
+            
+            const time = new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
             messageDiv.innerHTML = `
-                <span class="sender">${message.user}</span>
-                <span class="time">${time}</span>
+                <div class="sender">
+                    ${message.user}
+                    ${message.user === currentUser ? '<span class="badge">Você</span>' : ''}
+                </div>
                 <div class="text">${message.text}</div>
+                <div class="time">${time}</div>
             `;
             
             messagesDiv.appendChild(messageDiv);
