@@ -410,8 +410,8 @@
                 onlineCountSpan.textContent = userCount;
                 
                 // Limitar a 100 usuários
-                if (userCount > 100) {
-                    showNotification("O chat está cheio (100 usuários online). Tente novamente mais tarde.");
+                if (userCount > 10000) {
+                    showNotification("O chat está cheio (10000 usuários online). Tente novamente mais tarde.");
                     setTimeout(() => window.location.reload(), 3000);
                 }
             });
