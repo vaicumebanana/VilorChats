@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VilorChat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        #login-container, #chat-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .message .sender {
+            font-weight: bold;
+            color: #3366cc;
+        }
+        .message .time {
+            font-size: 0.8em;
+            color: #999;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #user-count {
+            text-align: right;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-container">
+        <h2>Login no VilorChat</h2>
+        <input type="text" id="username" placeholder="Usuário" value="VilorCreated" disabled>
+        <input type="password" id="password" placeholder="Senha">
+        <button id="login-btn">Entrar</button>
+    </div>
+
+    <div id="chat-container" style="display: none;">
+        <div id="user-count">Online: <span id="online-count">0</span>/100</div>
+        <h2>VilorChat Global</h2>
+        <div id="messages"></div>
+        <input type="text" id="message-input" placeholder="Digite sua mensagem...">
+        <button id="send-btn">Enviar</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <script>
+        // Configuração do Firebase com seu URL
+        const firebaseConfig = {
+            databaseURL: "https://vilorchatmessage-default-rtdb.firebaseio.com/"
+        };
+        
+        // Inicializa o Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Elementos da interface
+        const loginContainer = document.getElementById('login-container');
+        const chatContainer = document.getElementById('chat-container');
+        const loginBtn = document.getElementById('login-btn');
+        const passwordInput = document.getElementById('password');
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const onlineCountSpan = document.getElementById('online-count');
+
+        // Variáveis globais
+        let username = "VilorCreated";
+        let userRef;
+        let presenceRef;
+
+        // Login simples com senha fixa
+        loginBtn.addEventListener('click', () => {
+            if (passwordInput.value === "This") {
+                loginContainer.style.display = 'none';
+                chatContainer.style.display = 'block';
+                initializeChat();
+            } else {
+                alert("Senha incorreta! Use: This");
+            }
+        });
+
+        // Pressionar Enter no campo de senha
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loginBtn.click();
+            }
+        });
+
+        function initializeChat() {
+            // Referências do Firebase
+            const messagesRef = database.ref('messages');
+            presenceRef = database.ref('presence');
+            
+            // Registrar usuário online
+            userRef = presenceRef.push();
+            userRef.set({
+                user: username,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            
+            // Remover usuário quando sair
+            window.addEventListener('beforeunload', () => {
+                userRef.remove();
+            });
+            
+            // Monitorar contagem de usuários online
+            presenceRef.on('value', (snapshot) => {
+                const userCount = snapshot.numChildren();
+                onlineCountSpan.textContent = userCount;
+                
+                // Limitar a 100 usuários
+                if (userCount > 300) {
+                    alert("O chat está cheio (300 usuários online). Tente novamente mais tarde.");
+                    window.location.reload();
+                }
+            });
+            
+            // Carregar mensagens existentes
+            messagesRef.limitToLast(100).on('child_added', (snapshot) => {
+                const message = snapshot.val();
+                displayMessage(message);
+            });
+            
+            // Enviar mensagem
+            sendBtn.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+        
+        function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (messageText) {
+                const timestamp = firebase.database.ServerValue.TIMESTAMP;
+                
+                database.ref('messages').push().set({
+                    user: username,
+                    text: messageText,
+                    timestamp: timestamp
+                });
+                
+                messageInput.value = '';
+            }
+        }
+        
+        function displayMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            const time = new Date(message.timestamp).toLocaleTimeString();
+            
+            messageDiv.innerHTML = `
+                <span class="sender">${message.user}</span>
+                <span class="time">${time}</span>
+                <div class="text">${message.text}</div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
