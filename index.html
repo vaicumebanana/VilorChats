@@ -14,6 +14,7 @@
             --user-message-bg: #e3f2fd;
             --private-message-bg: #fff8e1;
             --error-color: #f44336;
+            --text-color: #333333;
         }
         
         body {
@@ -22,7 +23,7 @@
             margin: 0 auto;
             padding: 20px;
             background-color: var(--background-color);
-            color: #333;
+            color: var(--text-color);
         }
         
         #login-container, #chat-container {
@@ -105,6 +106,7 @@
             display: flex;
             border-bottom: 1px solid #ddd;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         
         .chat-tab {
@@ -114,6 +116,7 @@
             border-bottom: none;
             border-radius: 4px 4px 0 0;
             margin-right: 5px;
+            white-space: nowrap;
         }
         
         .chat-tab.active {
@@ -199,15 +202,19 @@
         
         .chat-input-container {
             display: flex;
+            flex-direction: column;
             gap: 10px;
         }
         
         #message-input {
             flex: 1;
-            padding: 12px;
-            border-radius: 6px;
+            padding: 15px;
+            border-radius: 8px;
             border: 1px solid #ccc;
             font-size: 1em;
+            color: var(--text-color);
+            min-height: 80px;
+            resize: vertical;
         }
         
         #send-btn {
@@ -218,6 +225,7 @@
             border: none;
             cursor: pointer;
             font-weight: bold;
+            align-self: flex-end;
         }
         
         #send-btn:hover {
@@ -245,6 +253,16 @@
             display: none;
         }
         
+        .user-connection {
+            font-size: 0.8em;
+            color: #666;
+            text-align: center;
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        
         @media (max-width: 768px) {
             .chat-columns {
                 flex-direction: column;
@@ -252,6 +270,10 @@
             
             #messages-container {
                 height: 300px;
+            }
+            
+            #message-input {
+                min-height: 60px;
             }
         }
     </style>
@@ -284,7 +306,7 @@
                 <div id="typing-indicator"></div>
                 
                 <div class="chat-input-container">
-                    <input type="text" id="message-input" placeholder="Digite sua mensagem..." autocomplete="off">
+                    <textarea id="message-input" placeholder="Digite sua mensagem..." autocomplete="off"></textarea>
                     <button id="send-btn">Enviar</button>
                 </div>
             </div>
@@ -333,6 +355,7 @@
         let activeChat = "public";
         let privateChats = {};
         let unreadMessages = {};
+        let connectionStatusRef;
 
         // Mostrar notificação
         function showNotification(message) {
@@ -375,18 +398,24 @@
             messagesRef = database.ref('messages/public');
             presenceRef = database.ref('presence');
             typingRef = database.ref('typing');
+            connectionStatusRef = database.ref('.info/connected');
             
             // Registrar usuário online
             userRef = presenceRef.push();
-            userRef.set({
-                user: currentUser,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
             
-            // Remover usuário quando sair
-            window.addEventListener('beforeunload', () => {
-                userRef.remove();
-                stopTyping();
+            // Verificar conexão
+            connectionStatusRef.on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    // Conexão ativa
+                    userRef.set({
+                        user: currentUser,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                        online: true
+                    });
+                    
+                    // Configurar para remover quando desconectar
+                    userRef.onDisconnect().remove();
+                }
             });
             
             // Monitorar usuários online
@@ -396,8 +425,13 @@
                 
                 // Processar usuários online
                 Object.keys(users).forEach(key => {
-                    const user = users[key].user;
-                    onlineUsers[user] = key;
+                    const userData = users[key];
+                    if (userData.online !== false) {
+                        onlineUsers[userData.user] = {
+                            key: key,
+                            timestamp: userData.timestamp
+                        };
+                    }
                 });
                 
                 // Atualizar contagem
@@ -435,7 +469,8 @@
             // Enviar mensagem
             sendBtn.addEventListener('click', sendMessage);
             messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
                     sendMessage();
                 }
             });
@@ -481,7 +516,13 @@
         function updateUserList() {
             userListDiv.innerHTML = "";
             
-            Object.keys(onlineUsers).sort().forEach(user => {
+            // Adicionar notificação de conexão/desconexão
+            const connectionEvents = [];
+            
+            // Ordenar usuários por nome
+            const sortedUsers = Object.keys(onlineUsers).sort();
+            
+            sortedUsers.forEach(user => {
                 if (user === currentUser) return;
                 
                 const userElement = document.createElement('div');
@@ -510,6 +551,14 @@
             currentUserElement.className = 'user-item current-user';
             currentUserElement.textContent = `${currentUser} (você)`;
             userListDiv.insertBefore(currentUserElement, userListDiv.firstChild);
+            
+            // Exibir eventos de conexão
+            connectionEvents.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.className = 'user-connection';
+                eventElement.textContent = event;
+                userListDiv.appendChild(eventElement);
+            });
         }
         
         function startPrivateChat(user) {
@@ -680,6 +729,7 @@
                 }
                 
                 messageInput.value = '';
+                messageInput.style.height = 'auto'; // Reset height after sending
             }
         }
         
@@ -711,6 +761,12 @@
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
+        
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
     </script>
 </body>
 </html>
